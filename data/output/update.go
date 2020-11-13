@@ -62,6 +62,11 @@ func update(in string, out string) error {
 		bidenShare := sample.Get("vote_shares", "bidenj").ToFloat64()
 		otherShare := 1.0 - (trumpShare + bidenShare)
 
+		// nobody has a share with zero votes
+		if totalVotes == 0 {
+			otherShare = 0.0
+		}
+
 		// truncate otherShare to 0.001 precision
 		otherShare = float64(int64(otherShare*1000.0)) / 1000.0
 

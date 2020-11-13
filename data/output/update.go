@@ -14,7 +14,7 @@ import (
 
 type row struct {
 	Time       string  `csv:"time"`
-	Eevp       int64   `csv:"pct"`
+	Eevp       float64 `csv:"pct"`
 	VotesTotal int64   `csv:"votes"`
 	ShareBiden float64 `csv:"biden pct"`
 	ShareTrump float64 `csv:"trump pct"`
@@ -102,7 +102,7 @@ func update(in string, out string) error {
 		// add row to CSV data
 		rows = append(rows, row{
 			Time:       sampleTime.Format("2006-01-02 15:04:05"),
-			Eevp:       sample.Get("eevp").ToInt64(),
+			Eevp:       sample.Get("eevp").ToFloat64() / 100.0,
 			VotesTotal: int64(totalVotes),
 			ShareBiden: bidenShare,
 			ShareTrump: trumpShare,

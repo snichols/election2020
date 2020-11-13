@@ -46,10 +46,6 @@ func update(in string, out string) error {
 
 		// get the total votes
 		totalVotes := sample.Get("votes").ToFloat64()
-		if totalVotes == 0 {
-			// ignore samples with no vote impact
-			continue
-		}
 
 		// compute the maximum variation in vote total due to 0.001 precision
 		maxVariation := int64(totalVotes * 0.001)
@@ -83,20 +79,22 @@ func update(in string, out string) error {
 		// detect anomalies
 		notes := []string{}
 
-		if batchTotal < 0 {
-			notes = append(notes, fmt.Sprintf("Total %d", batchTotal))
-		}
+		if maxVariation > 0 {
+			if batchTotal < 0 {
+				notes = append(notes, fmt.Sprintf("Total %d", batchTotal))
+			}
 
-		if batchBiden < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Biden %d", batchBiden))
-		}
+			if batchBiden <= -maxVariation {
+				notes = append(notes, fmt.Sprintf("Biden %d", batchBiden))
+			}
 
-		if batchTrump < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Trump %d", batchTrump))
-		}
+			if batchTrump <= -maxVariation {
+				notes = append(notes, fmt.Sprintf("Trump %d", batchTrump))
+			}
 
-		if batchOther < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Other %d", batchOther))
+			if batchOther <= -maxVariation {
+				notes = append(notes, fmt.Sprintf("Other %d", batchOther))
+			}
 		}
 
 		// add row to CSV data

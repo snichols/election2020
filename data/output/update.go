@@ -84,19 +84,19 @@ func update(in string, out string) error {
 		notes := []string{}
 
 		if batchTotal < 0 {
-			notes = append(notes, fmt.Sprintf("Total %d votes", batchTotal))
+			notes = append(notes, fmt.Sprintf("Total %d", batchTotal))
 		}
 
 		if batchBiden < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Biden %d votes", batchBiden))
+			notes = append(notes, fmt.Sprintf("Biden %d", batchBiden))
 		}
 
 		if batchTrump < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Trump %d votes", batchTrump))
+			notes = append(notes, fmt.Sprintf("Trump %d", batchTrump))
 		}
 
 		if batchOther < -maxVariation {
-			notes = append(notes, fmt.Sprintf("Other %d votes", batchOther))
+			notes = append(notes, fmt.Sprintf("Other %d", batchOther))
 		}
 
 		// add row to CSV data

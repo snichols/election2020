@@ -20,9 +20,9 @@ type row struct {
 	ShareBiden float64 `csv:"share_biden"`
 	ShareTrump float64 `csv:"share_trump"`
 	ShareOther float64 `csv:"share_other"`
-	TotalBiden int64   `csv:"total_biden`
-	TotalTrump int64   `csv:"total_trump`
-	TotalOther int64   `csv:"total_other`
+	TotalBiden int64   `csv:"total_biden"`
+	TotalTrump int64   `csv:"total_trump"`
+	TotalOther int64   `csv:"total_other"`
 	BatchVotes int64   `csv:"batch_votes"`
 	BatchBiden int64   `csv:"batch_biden"`
 	BatchTrump int64   `csv:"batch_trump"`

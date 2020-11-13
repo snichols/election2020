@@ -20,10 +20,13 @@ type row struct {
 	ShareBiden float64 `csv:"share_biden"`
 	ShareTrump float64 `csv:"share_trump"`
 	ShareOther float64 `csv:"share_other"`
-	DeltaVotes int64   `csv:"delta_votes"`
-	DeltaBiden int64   `csv:"delta_biden"`
-	DeltaTrump int64   `csv:"delta_trump"`
-	DeltaOther int64   `csv:"delta_other"`
+	TotalBiden int64   `csv:"total_biden`
+	TotalTrump int64   `csv:"total_trump`
+	TotalOther int64   `csv:"total_other`
+	BatchVotes int64   `csv:"batch_votes"`
+	BatchBiden int64   `csv:"batch_biden"`
+	BatchTrump int64   `csv:"batch_trump"`
+	BatchOther int64   `csv:"batch_other"`
 	Note       string  `csv:"note"`
 }
 
@@ -72,28 +75,33 @@ func update(in string, out string) error {
 		trumpVotes := totalVotes * trumpShare
 		otherVotes := totalVotes * otherShare
 
-		// compute vote deltas overall and for trump, biden, and "other"
-		deltaVotes := int64(totalVotes - lastTotalVotes)
-		deltaTrump := int64(trumpVotes - lastTrumpVotes)
-		deltaBiden := int64(bidenVotes - lastBidenVotes)
-		deltaOther := int64(otherVotes - lastOtherVotes)
+		// compute vote batch size overall and for trump, biden, and "other"
+		batchTotal := int64(totalVotes - lastTotalVotes)
+		batchTrump := int64(trumpVotes - lastTrumpVotes)
+		batchBiden := int64(bidenVotes - lastBidenVotes)
+		batchOther := int64(otherVotes - lastOtherVotes)
 
 		// detect anomalies
 		anomaly, notes := false, []string{}
 
-		if deltaVotes < 0 {
+		if batchTotal < 0 {
 			anomaly = true
-			notes = append(notes, fmt.Sprintf("Total %d votes", deltaVotes))
+			notes = append(notes, fmt.Sprintf("Total %d votes", batchTotal))
 		}
 
-		if deltaBiden <= -maxVariation {
+		if batchBiden <= -maxVariation {
 			anomaly = true
-			notes = append(notes, fmt.Sprintf("Biden %d votes", deltaBiden))
+			notes = append(notes, fmt.Sprintf("Biden %d votes", batchBiden))
 		}
 
-		if deltaTrump <= -maxVariation {
+		if batchTrump <= -maxVariation {
 			anomaly = true
-			notes = append(notes, fmt.Sprintf("Trump %d votes", deltaTrump))
+			notes = append(notes, fmt.Sprintf("Trump %d votes", batchTrump))
+		}
+
+		if batchOther <= -maxVariation {
+			anomaly = true
+			notes = append(notes, fmt.Sprintf("Other %d votes", batchOther))
 		}
 
 		// add row to CSV data
@@ -105,10 +113,13 @@ func update(in string, out string) error {
 			ShareBiden: bidenShare,
 			ShareTrump: trumpShare,
 			ShareOther: otherShare,
-			DeltaVotes: deltaVotes,
-			DeltaBiden: deltaBiden,
-			DeltaTrump: deltaTrump,
-			DeltaOther: deltaOther,
+			TotalBiden: int64(bidenVotes),
+			TotalTrump: int64(trumpVotes),
+			TotalOther: int64(otherVotes),
+			BatchVotes: batchTotal,
+			BatchBiden: batchBiden,
+			BatchTrump: batchTrump,
+			BatchOther: batchOther,
 			Note:       strings.Join(notes, ", "),
 		})
 

@@ -15,10 +15,10 @@ type row struct {
 	Time       time.Time `csv:"time"`
 	Eevp       int64     `csv:"eevp"`
 	VotesTotal int64     `csv:"votes_total"`
-	VotesDelta int64     `csv:"votes_delta"`
 	ShareBiden float64   `csv:"share_biden"`
 	ShareTrump float64   `csv:"share_trump"`
 	ShareOther float64   `csv:"share_other"`
+	DeltaVotes int64     `csv:"delta_votes"`
 	DeltaBiden int64     `csv:"delta_biden"`
 	DeltaTrump int64     `csv:"delta_trump"`
 	DeltaOther int64     `csv:"delta_other"`
@@ -49,10 +49,10 @@ func update(in string, out string) error {
 			Time:       t,
 			Eevp:       s.Get("eevp").ToInt64(),
 			VotesTotal: int64(v),
-			VotesDelta: int64(v - totalVotes),
 			ShareBiden: bs,
 			ShareTrump: ts,
 			ShareOther: os,
+			DeltaVotes: int64(v - totalVotes),
 			DeltaBiden: int64(bv - bidenVotes),
 			DeltaTrump: int64(tv - trumpVotes),
 			DeltaOther: int64(ov - otherVotes),

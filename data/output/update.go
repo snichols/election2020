@@ -16,16 +16,16 @@ type row struct {
 	Time       string  `csv:"time"`
 	Eevp       int64   `csv:"pct"`
 	VotesTotal int64   `csv:"votes"`
-	ShareBiden float64 `csv:"share\nbiden"`
-	ShareTrump float64 `csv:"share\ntrump"`
-	ShareOther float64 `csv:"share\nother"`
-	TotalBiden int64   `csv:"votes\nbiden"`
-	TotalTrump int64   `csv:"votes\ntrump"`
-	TotalOther int64   `csv:"votes\nother"`
-	BatchVotes int64   `csv:"batch size"`
-	BatchBiden int64   `csv:"batch\nbiden"`
-	BatchTrump int64   `csv:"batch\ntrump"`
-	BatchOther int64   `csv:"batch\nother"`
+	ShareBiden float64 `csv:"biden pct"`
+	ShareTrump float64 `csv:"trump pct"`
+	ShareOther float64 `csv:"other pct"`
+	TotalBiden int64   `csv:"biden tot"`
+	TotalTrump int64   `csv:"trump tot"`
+	TotalOther int64   `csv:"other tot"`
+	BatchVotes int64   `csv:"batch"`
+	BatchBiden int64   `csv:"biden bat"`
+	BatchTrump int64   `csv:"trump bat"`
+	BatchOther int64   `csv:"other bat"`
 	Note       string  `csv:"note"`
 }
 
@@ -114,7 +114,7 @@ func update(in string, out string) error {
 			BatchBiden: batchBiden,
 			BatchTrump: batchTrump,
 			BatchOther: batchOther,
-			Note:       strings.Join(notes, "\n"),
+			Note:       strings.Join(notes, " "),
 		})
 
 		// update last values

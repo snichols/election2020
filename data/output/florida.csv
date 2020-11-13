@@ -1,13 +1,4 @@
-time,pct,votes,"share
-biden","share
-trump","share
-other","votes
-biden","votes
-trump","votes
-other",batch size,"batch
-biden","batch
-trump","batch
-other",note
+time,pct,votes,biden pct,trump pct,other pct,biden tot,trump tot,other tot,batch,biden bat,trump bat,other bat,note
 2020-11-03 19:02:01,5,560771,0.428,0.564,0.008,240009,316274,4486,560771,240009,316274,4486,
 2020-11-03 19:02:42,7,844914,0.434,0.557,0.008,366692,470617,6759,284143,126682,154342,2273,
 2020-11-03 19:03:26,9,1004171,0.435,0.556,0.008,436814,558319,8033,159257,70121,87701,1274,

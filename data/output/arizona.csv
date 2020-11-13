@@ -1,4 +1,13 @@
-time,eevp,total,share:b,share:t,share:o,total:b,total:t,total:o,batch,batch:b,batch:t,batch:o,note
+time,pct,votes,"share
+biden","share
+trump","share
+other","votes
+biden","votes
+trump","votes
+other",batch size,"batch
+biden","batch
+trump","batch
+other",note
 2020-11-03 22:03:36,3,104866,0.48,0.505,0.015,50335,52957,1572,104866,50335,52957,1572,
 2020-11-03 22:05:47,23,730299,0.566,0.421,0.013,413349,307455,9493,625433,363013,254498,7920,
 2020-11-03 22:06:25,69,2203485,0.55,0.437,0.012,1211916,962922,26441,1473186,798567,655467,16947,

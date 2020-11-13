@@ -14,18 +14,18 @@ import (
 
 type row struct {
 	Time       string  `csv:"time"`
-	Eevp       int64   `csv:"eevp"`
-	VotesTotal int64   `csv:"total"`
-	ShareBiden float64 `csv:"share:b"`
-	ShareTrump float64 `csv:"share:t"`
-	ShareOther float64 `csv:"share:o"`
-	TotalBiden int64   `csv:"total:b"`
-	TotalTrump int64   `csv:"total:t"`
-	TotalOther int64   `csv:"total:o"`
-	BatchVotes int64   `csv:"batch"`
-	BatchBiden int64   `csv:"batch:b"`
-	BatchTrump int64   `csv:"batch:t"`
-	BatchOther int64   `csv:"batch:o"`
+	Eevp       int64   `csv:"pct"`
+	VotesTotal int64   `csv:"votes"`
+	ShareBiden float64 `csv:"share\nbiden"`
+	ShareTrump float64 `csv:"share\ntrump"`
+	ShareOther float64 `csv:"share\nother"`
+	TotalBiden int64   `csv:"votes\nbiden"`
+	TotalTrump int64   `csv:"votes\ntrump"`
+	TotalOther int64   `csv:"votes\nother"`
+	BatchVotes int64   `csv:"batch size"`
+	BatchBiden int64   `csv:"batch\nbiden"`
+	BatchTrump int64   `csv:"batch\ntrump"`
+	BatchOther int64   `csv:"batch\nother"`
 	Note       string  `csv:"note"`
 }
 
@@ -114,7 +114,7 @@ func update(in string, out string) error {
 			BatchBiden: batchBiden,
 			BatchTrump: batchTrump,
 			BatchOther: batchOther,
-			Note:       strings.Join(notes, ", "),
+			Note:       strings.Join(notes, "\n"),
 		})
 
 		// update last values

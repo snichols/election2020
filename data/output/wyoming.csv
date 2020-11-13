@@ -1,4 +1,4 @@
-anomaly,time_est,eevp,votes_total,share_biden,share_trump,share_other,total_biden,total_trump,total_other,batch_votes,batch_biden,batch_trump,batch_other,note
+anomaly,time,eevp,total,share:b,share:t,share:o,total:b,total:t,total:o,batch,batch:b,batch:t,batch:o,note
 false,2020-11-03 21:39:32,1,1741,0.179,0.797,0.024,311,1387,41,1741,311,1387,41,
 false,2020-11-03 21:57:26,2,4638,0.131,0.84,0.029,607,3895,134,2897,295,2508,92,
 false,2020-11-03 22:08:33,2,6617,0.182,0.788,0.03,1204,5214,198,1979,596,1318,64,

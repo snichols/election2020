@@ -1,4 +1,4 @@
-anomaly,time_est,eevp,votes_total,share_biden,share_trump,share_other,total_biden,total_trump,total_other,batch_votes,batch_biden,batch_trump,batch_other,note
+anomaly,time,eevp,total,share:b,share:t,share:o,total:b,total:t,total:o,batch,batch:b,batch:t,batch:o,note
 true,2020-11-03 19:19:27,0,77,0.571,0.429,0,43,33,0,77,43,33,0,Other 0 votes
 true,2020-11-03 19:42:45,0,11,0.636,0.364,0,6,4,0,-66,-36,-29,0,"Total -66 votes, Biden -36 votes, Trump -29 votes, Other 0 votes"
 false,2020-11-03 20:03:44,1,64535,0.799,0.188,0.012,51563,12132,774,64524,51556,12128,774,

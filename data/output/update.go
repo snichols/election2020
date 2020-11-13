@@ -14,19 +14,19 @@ import (
 
 type row struct {
 	Anomaly    bool    `csv:"anomaly"`
-	Time       string  `csv:"time_est"`
+	Time       string  `csv:"time"`
 	Eevp       int64   `csv:"eevp"`
-	VotesTotal int64   `csv:"votes_total"`
-	ShareBiden float64 `csv:"share_biden"`
-	ShareTrump float64 `csv:"share_trump"`
-	ShareOther float64 `csv:"share_other"`
-	TotalBiden int64   `csv:"total_biden"`
-	TotalTrump int64   `csv:"total_trump"`
-	TotalOther int64   `csv:"total_other"`
-	BatchVotes int64   `csv:"batch_votes"`
-	BatchBiden int64   `csv:"batch_biden"`
-	BatchTrump int64   `csv:"batch_trump"`
-	BatchOther int64   `csv:"batch_other"`
+	VotesTotal int64   `csv:"total"`
+	ShareBiden float64 `csv:"share:b"`
+	ShareTrump float64 `csv:"share:t"`
+	ShareOther float64 `csv:"share:o"`
+	TotalBiden int64   `csv:"total:b"`
+	TotalTrump int64   `csv:"total:t"`
+	TotalOther int64   `csv:"total:o"`
+	BatchVotes int64   `csv:"batch"`
+	BatchBiden int64   `csv:"batch:b"`
+	BatchTrump int64   `csv:"batch:t"`
+	BatchOther int64   `csv:"batch:o"`
 	Note       string  `csv:"note"`
 }
 

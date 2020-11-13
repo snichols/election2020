@@ -13,7 +13,6 @@ import (
 )
 
 type row struct {
-	Anomaly    bool    `csv:"anomaly"`
 	Time       string  `csv:"time"`
 	Eevp       int64   `csv:"eevp"`
 	VotesTotal int64   `csv:"total"`
@@ -82,31 +81,26 @@ func update(in string, out string) error {
 		batchOther := int64(otherVotes - lastOtherVotes)
 
 		// detect anomalies
-		anomaly, notes := false, []string{}
+		notes := []string{}
 
 		if batchTotal < 0 {
-			anomaly = true
 			notes = append(notes, fmt.Sprintf("Total %d votes", batchTotal))
 		}
 
-		if batchBiden <= -maxVariation {
-			anomaly = true
+		if batchBiden < -maxVariation {
 			notes = append(notes, fmt.Sprintf("Biden %d votes", batchBiden))
 		}
 
-		if batchTrump <= -maxVariation {
-			anomaly = true
+		if batchTrump < -maxVariation {
 			notes = append(notes, fmt.Sprintf("Trump %d votes", batchTrump))
 		}
 
-		if batchOther <= -maxVariation {
-			anomaly = true
+		if batchOther < -maxVariation {
 			notes = append(notes, fmt.Sprintf("Other %d votes", batchOther))
 		}
 
 		// add row to CSV data
 		rows = append(rows, row{
-			Anomaly:    anomaly,
 			Time:       sampleTime.Format("2006-01-02 15:04:05"),
 			Eevp:       sample.Get("eevp").ToInt64(),
 			VotesTotal: int64(totalVotes),

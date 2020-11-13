@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gocarina/gocsv"
@@ -12,16 +13,18 @@ import (
 )
 
 type row struct {
-	Time       time.Time `csv:"time"`
-	Eevp       int64     `csv:"eevp"`
-	VotesTotal int64     `csv:"votes_total"`
-	ShareBiden float64   `csv:"share_biden"`
-	ShareTrump float64   `csv:"share_trump"`
-	ShareOther float64   `csv:"share_other"`
-	DeltaVotes int64     `csv:"delta_votes"`
-	DeltaBiden int64     `csv:"delta_biden"`
-	DeltaTrump int64     `csv:"delta_trump"`
-	DeltaOther int64     `csv:"delta_other"`
+	Anomaly    bool    `csv:"anomaly"`
+	Time       string  `csv:"time_est"`
+	Eevp       int64   `csv:"eevp"`
+	VotesTotal int64   `csv:"votes_total"`
+	ShareBiden float64 `csv:"share_biden"`
+	ShareTrump float64 `csv:"share_trump"`
+	ShareOther float64 `csv:"share_other"`
+	DeltaVotes int64   `csv:"delta_votes"`
+	DeltaBiden int64   `csv:"delta_biden"`
+	DeltaTrump int64   `csv:"delta_trump"`
+	DeltaOther int64   `csv:"delta_other"`
+	Note       string  `csv:"note"`
 }
 
 func update(in string, out string) error {
@@ -29,45 +32,103 @@ func update(in string, out string) error {
 	if err != nil {
 		return err
 	}
+	var est *time.Location
+	if est, err = time.LoadLocation("EST"); err != nil {
+		return err
+	}
 	rows := []row{}
 	timeseries := jsoniter.Get(data, "data", "races", 0, "timeseries")
-	trumpVotes, bidenVotes, otherVotes, totalVotes := 0.0, 0.0, 0.0, 0.0
+	lastTrumpVotes, lastBidenVotes, lastOtherVotes, lastTotalVotes := 0.0, 0.0, 0.0, 0.0
 	for i := 0; i < timeseries.Size(); i++ {
-		s := timeseries.Get(i)
-		var t time.Time
-		if t, err = time.Parse("2006-01-02T15:04:05Z", s.Get("timestamp").ToString()); err != nil {
+		sample := timeseries.Get(i)
+
+		// get the total votes
+		totalVotes := sample.Get("votes").ToFloat64()
+		if totalVotes == 0 {
+			// ignore samples with no vote impact
+			continue
+		}
+
+		// compute the maximum variation in vote total due to 0.001 precision
+		maxVariation := int64(totalVotes * 0.001)
+
+		// get the sample time in EST timezone
+		var sampleTime time.Time
+		if sampleTime, err = time.Parse("2006-01-02T15:04:05Z", sample.Get("timestamp").ToString()); err != nil {
 			return err
 		}
-		v := s.Get("votes").ToFloat64()
-		ts := s.Get("vote_shares", "trumpd").ToFloat64()
-		bs := s.Get("vote_shares", "bidenj").ToFloat64()
-		os := float64(int64((1.0-(ts+bs))*1000)) / 1000.0
-		tv := v * ts
-		bv := v * bs
-		ov := v * os
+		sampleTime = sampleTime.In(est)
+
+		// get shares for trump, biden, and "other"
+		trumpShare := sample.Get("vote_shares", "trumpd").ToFloat64()
+		bidenShare := sample.Get("vote_shares", "bidenj").ToFloat64()
+		otherShare := 1.0 - (trumpShare + bidenShare)
+
+		// truncate otherShare to 0.001 precision
+		otherShare = float64(int64(otherShare*1000.0)) / 1000.0
+
+		// compute vote totals for biden, trump, and "other"
+		bidenVotes := totalVotes * bidenShare
+		trumpVotes := totalVotes * trumpShare
+		otherVotes := totalVotes * otherShare
+
+		// compute vote deltas overall and for trump, biden, and "other"
+		deltaVotes := int64(totalVotes - lastTotalVotes)
+		deltaTrump := int64(trumpVotes - lastTrumpVotes)
+		deltaBiden := int64(bidenVotes - lastBidenVotes)
+		deltaOther := int64(otherVotes - lastOtherVotes)
+
+		// detect anomalies
+		anomaly, notes := false, []string{}
+
+		if deltaVotes < 0 {
+			anomaly = true
+			notes = append(notes, fmt.Sprintf("Total %d votes", deltaVotes))
+		}
+
+		if deltaBiden <= -maxVariation {
+			anomaly = true
+			notes = append(notes, fmt.Sprintf("Biden %d votes", deltaBiden))
+		}
+
+		if deltaTrump <= -maxVariation {
+			anomaly = true
+			notes = append(notes, fmt.Sprintf("Trump %d votes", deltaTrump))
+		}
+
+		// add row to CSV data
 		rows = append(rows, row{
-			Time:       t,
-			Eevp:       s.Get("eevp").ToInt64(),
-			VotesTotal: int64(v),
-			ShareBiden: bs,
-			ShareTrump: ts,
-			ShareOther: os,
-			DeltaVotes: int64(v - totalVotes),
-			DeltaBiden: int64(bv - bidenVotes),
-			DeltaTrump: int64(tv - trumpVotes),
-			DeltaOther: int64(ov - otherVotes),
+			Anomaly:    anomaly,
+			Time:       sampleTime.Format("2006-01-02 15:04:05"),
+			Eevp:       sample.Get("eevp").ToInt64(),
+			VotesTotal: int64(totalVotes),
+			ShareBiden: bidenShare,
+			ShareTrump: trumpShare,
+			ShareOther: otherShare,
+			DeltaVotes: deltaVotes,
+			DeltaBiden: deltaBiden,
+			DeltaTrump: deltaTrump,
+			DeltaOther: deltaOther,
+			Note:       strings.Join(notes, ", "),
 		})
-		trumpVotes = tv
-		bidenVotes = bv
-		otherVotes = ov
-		totalVotes = v
+
+		// update last values
+		lastTrumpVotes = trumpVotes
+		lastBidenVotes = bidenVotes
+		lastOtherVotes = otherVotes
+		lastTotalVotes = totalVotes
 	}
-	if data, err = gocsv.MarshalBytes(rows); err != nil {
-		return err
+
+	// save rows to CSV file
+	{
+		if data, err = gocsv.MarshalBytes(rows); err != nil {
+			return err
+		}
+		if err = ioutil.WriteFile(out, data, os.ModePerm); err != nil {
+			return err
+		}
 	}
-	if err = ioutil.WriteFile(out, data, os.ModePerm); err != nil {
-		return err
-	}
+
 	return nil
 }
 

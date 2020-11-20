@@ -13,20 +13,25 @@ import (
 )
 
 type row struct {
-	Time       string  `csv:"time"`
-	Eevp       float64 `csv:"pct"`
-	VotesTotal int64   `csv:"votes"`
-	ShareBiden float64 `csv:"biden pct"`
-	ShareTrump float64 `csv:"trump pct"`
-	ShareOther float64 `csv:"other pct"`
-	TotalBiden int64   `csv:"biden tot"`
-	TotalTrump int64   `csv:"trump tot"`
-	TotalOther int64   `csv:"other tot"`
-	BatchVotes int64   `csv:"batch"`
-	BatchBiden int64   `csv:"biden bat"`
-	BatchTrump int64   `csv:"trump bat"`
-	BatchOther int64   `csv:"other bat"`
-	Note       string  `csv:"note"`
+	Time                 string  `csv:"time"`
+	Eevp                 float64 `csv:"pct"`
+	VotesTotal           int64   `csv:"votes"`
+	ShareBiden           float64 `csv:"biden pct"`
+	ShareTrump           float64 `csv:"trump pct"`
+	ShareOther           float64 `csv:"other pct"`
+	TotalBiden           int64   `csv:"biden tot"`
+	TotalTrump           int64   `csv:"trump tot"`
+	TotalOther           int64   `csv:"other tot"`
+	BatchVotes           int64   `csv:"batch"`
+	BatchBiden           int64   `csv:"biden bat"`
+	BatchTrump           int64   `csv:"trump bat"`
+	BatchOther           int64   `csv:"other bat"`
+	BatchBidenTrumpRatio float64 `csv:"b:t"`
+	Note                 string  `csv:"note"`
+}
+
+func truncate(v float64) float64 {
+	return float64(int64(v*1000.0)) / 1000.0
 }
 
 func update(in string, out string) error {
@@ -68,7 +73,7 @@ func update(in string, out string) error {
 		}
 
 		// truncate otherShare to 0.001 precision
-		otherShare = float64(int64(otherShare*1000.0)) / 1000.0
+		otherShare = truncate(otherShare)
 
 		// compute vote totals for biden, trump, and "other"
 		bidenVotes := totalVotes * bidenShare
@@ -80,6 +85,12 @@ func update(in string, out string) error {
 		batchTrump := int64(trumpVotes - lastTrumpVotes)
 		batchBiden := int64(bidenVotes - lastBidenVotes)
 		batchOther := int64(otherVotes - lastOtherVotes)
+
+		// compute ratio of biden/trump batch size
+		batchBidenTrumpRatio := 0.0
+		if batchBiden > 0 && batchTrump > 0 {
+			batchBidenTrumpRatio = truncate(float64(batchBiden) / float64(batchTrump))
+		}
 
 		// detect anomalies
 		notes := []string{}
@@ -104,20 +115,21 @@ func update(in string, out string) error {
 
 		// add row to CSV data
 		rows = append(rows, row{
-			Time:       sampleTime.Format("2006-01-02 15:04:05"),
-			Eevp:       sample.Get("eevp").ToFloat64() / 100.0,
-			VotesTotal: int64(totalVotes),
-			ShareBiden: bidenShare,
-			ShareTrump: trumpShare,
-			ShareOther: otherShare,
-			TotalBiden: int64(bidenVotes),
-			TotalTrump: int64(trumpVotes),
-			TotalOther: int64(otherVotes),
-			BatchVotes: batchTotal,
-			BatchBiden: batchBiden,
-			BatchTrump: batchTrump,
-			BatchOther: batchOther,
-			Note:       strings.Join(notes, " "),
+			Time:                 sampleTime.Format("2006-01-02 15:04:05"),
+			Eevp:                 sample.Get("eevp").ToFloat64() / 100.0,
+			VotesTotal:           int64(totalVotes),
+			ShareBiden:           bidenShare,
+			ShareTrump:           trumpShare,
+			ShareOther:           otherShare,
+			TotalBiden:           int64(bidenVotes),
+			TotalTrump:           int64(trumpVotes),
+			TotalOther:           int64(otherVotes),
+			BatchVotes:           batchTotal,
+			BatchBiden:           batchBiden,
+			BatchTrump:           batchTrump,
+			BatchOther:           batchOther,
+			BatchBidenTrumpRatio: batchBidenTrumpRatio,
+			Note:                 strings.Join(notes, " "),
 		})
 
 		// update last values
